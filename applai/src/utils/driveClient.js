@@ -56,7 +56,7 @@ export async function ensureFile(filename = "application.json") {
     return created.id;
 }
 
-export async function loadApplication(fileId) {
+export async function loadApplications(fileId) {
     const r = await authFetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`);
     if (!r.ok) return [];
     const data = await r.json();
