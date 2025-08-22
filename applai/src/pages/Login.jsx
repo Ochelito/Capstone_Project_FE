@@ -1,26 +1,43 @@
 import React from 'react';
 import LoginForm from './components/Forms/LoginForm';
 import GoogleLoginButton from './components/Buttons/GoogleLoginButton';
-import SubmitButton from './components/Buttons/SubmitButton';
-import useAuthStore from '../store/authStore';
+import useAuthStore from '@/store/useAuthStore';
+import useApplicationStore from '@/store/applicationStore';
 
 function Login() {
-    const { user } = useAuthStore();
+    const login = useAuthStore(state => state.login);
+    const initApplications = useApplicationStore(state => state.init);
+
+    const handleEmailLogin = (email) => {
+        // Authenticate email/password (dummy example here)
+        login({ email, method: "local" });
+        initApplications("local");  // load from localStorage
+    };
+
+    const handleGoogleLogin = (userData) => {
+        login({ ...userData, method: "google" });
+        initApplications("drive");   // load from Google Drive
+    };
 
     return (
         <div className="login-page">
             <div>
                 <img src="./assets/logo.png" alt="Logo" />
                 <h1>Start tracking your Job Applications for FREE</h1>
-                <p>Register authomatically with your Google Account credentials or Login if an existing User.</p>
-                <LoginForm />
-                <SubmitButton />
+                <p>Register automatically with your Google Account credentials or Login if an existing User.</p>
+
+                <LoginForm onLogin={handleEmailLogin} />
+                <button onClick={() => handleEmailLogin(document.getElementById("email").value)}>
+                    Login
+                </button>
+
                 <div>
                     <span></span>
                     <p>or continue with</p>
                     <span></span>
                 </div>
-                <GoogleLoginButton />
+                
+                <GoogleLoginButton onSuccess={handleGoogleLogin} />
             </div>
             
             <div className="login-image">

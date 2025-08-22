@@ -1,18 +1,22 @@
 import { useEffect } from "react";
-import { useNavigate } from "react-router-dom"; // ✅ React Router
+import { useNavigate } from "react-router-dom";
 import useApplicationStore from "@/store/applicationStore";
 import useAuthStore from "@/store/useAuthStore";
 import ApplicationStatsBar from "@/components/charts/ApplicationStatsBar";
 import ApplicationStatsLine from "@/components/charts/ApplicationStatsLine";
 
 export default function Dashboard() {
-  const { ready, initFromDrive, applications } = useApplicationStore();
-  const { user } = useAuthStore();
-  const navigate = useNavigate(); // ✅ useNavigate
+  const { ready, init, applications } = useApplicationStore();
+  const { user, loginMethod } = useAuthStore(); // loginMethod: "google" or "email"
+  const navigate = useNavigate();
 
   useEffect(() => {
-    if (!ready) initFromDrive();
-  }, [ready, initFromDrive]);
+    if (!ready) {
+      // Determine mode based on login type
+      const mode = loginMethod === "google" ? "drive" : "local";
+      init(mode);
+    }
+  }, [ready, init, loginMethod]);
 
   if (!ready) return <div className="p-6">Loading dashboard…</div>;
 
@@ -30,7 +34,7 @@ export default function Dashboard() {
     if (applications.length === 0) {
       alert("No applications yet, please add one!");
     }
-    navigate("/applications"); // ✅ React Router navigation
+    navigate("/applications");
   };
 
   return (

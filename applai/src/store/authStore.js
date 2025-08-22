@@ -4,10 +4,14 @@ import { persist } from "zustand/middleware";
 const useAuthStore = create(
   persist(
     (set) => ({
-      user: null, // no user signed in initially
+      user: null,          // currently logged-in user
+      loginMethod: null,   // "google" or "email"
 
-      login: (userData) => set({ user: userData }), // sets user when logged in
-      logout: () => set({ user: null }),            // clears user on logout
+      // log in user and set method
+      login: (userData, method) => set({ user: userData, loginMethod: method }),
+
+      // log out user and clear method
+      logout: () => set({ user: null, loginMethod: null }),
     }),
     {
       name: "auth-storage", // key name in localStorage

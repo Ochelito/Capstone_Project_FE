@@ -1,120 +1,101 @@
-import { create } from "zustand";
-import {
-  ensureFile,
-  loadApplications,
-  saveApplications,
-} from "@/utils/driveClient";
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import useApplicationStore from "@/store/applicationStore";
+import useAuthStore from "@/store/useAuthStore";
+import ApplicationStatsBar from "@/components/charts/ApplicationStatsBar";
+import ApplicationStatsLine from "@/components/charts/ApplicationStatsLine";
 
-const useApplicationStore = create((set, get) => ({
-  fileId: null,
-  applications: [],
-  trash: [],   // 🆕 keep deleted apps here
-  ready: false,
+export default function Dashboard() {
+  const { ready, init } = useApplicationStore();
+  const { user, loginMethod } = useAuthStore();
+  const navigate = useNavigate();
 
-  // Initialize from Google Drive
-  initFromDrive: async () => {
-    const fileId = await ensureFile();
-    const data = await loadApplications(fileId);
+  useEffect(() => {
+    if (!ready) {
+      // initialize store based on login method
+      init(loginMethod === "google" ? "drive" : "local");
+    }
+  }, [ready, init, loginMethod]);
 
-    // If old data doesn't have trash, default to empty
-    set({
-      fileId,
-      applications: data.applications || data,
-      trash: data.trash || [],
-      ready: true,
-    });
-  },
+  if (!ready) return <div className="p-6">Loading dashboard…</div>;
 
-  // Save everything (apps + trash)
-  saveAll: async () => {
-    const { fileId, applications, trash } = get();
-    await saveApplications(fileId, { applications, trash });
-  },
+  const username = user?.email ? user.email.split("@")[0] : "Guest";
 
-  // Add new application
-  addApplication: async (app) => {
-    const newApp = {
-      id: Date.now().toString(),
-      company: app.company || "",
-      position: app.position || "",
-      status: app.status || "applied",
-      interviewDate:
-        app.status === "interview" ? app.interviewDate || null : null,
-      createdAt: new Date().toISOString(),
-    };
+  // stats
+  const { applications } = useApplicationStore.getState();
+  const total = applications.length;
+  const interviews = applications.filter(a => a.status === "interview").length;
+  const offers = applications.filter(a => a.status === "offer").length;
+  const rejections = applications.filter(a => a.status === "rejected").length;
 
-    const next = [...get().applications, newApp];
-    set({ applications: next });
-    await get().saveAll();
-  },
+  const handleViewApplications = () => {
+    if (total === 0) alert("No applications yet, please add one!");
+    navigate("/applications");
+  };
 
-  // Update application
-  updateApplication: async (id, fields) => {
-    const next = get().applications.map((a) => {
-      if (a.id !== id) return a;
+  return (
+    <div className="p-6 space-y-8">
+      {/* Header */}
+      <h1 className="text-2xl font-bold">Dashboard</h1>
+      <p className="text-gray-600">Welcome back, {username}</p>
 
-      let updated = { ...a, ...fields };
+      {/* Stats boxes */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="bg-white rounded-xl shadow p-4 text-center">
+          <h3 className="text-lg font-semibold">Applied</h3>
+          <p className="text-2xl font-bold">{total}</p>
+        </div>
+        <div className="bg-white rounded-xl shadow p-4 text-center">
+          <h3 className="text-lg font-semibold">Interviews</h3>
+          <p className="text-2xl font-bold">{interviews}</p>
+        </div>
+        <div className="bg-white rounded-xl shadow p-4 text-center">
+          <h3 className="text-lg font-semibold">Offers</h3>
+          <p className="text-2xl font-bold">{offers}</p>
+        </div>
+        <div className="bg-white rounded-xl shadow p-4 text-center">
+          <h3 className="text-lg font-semibold">Rejections</h3>
+          <p className="text-2xl font-bold">{rejections}</p>
+        </div>
+      </div>
 
-      if (fields.status) {
-        if (fields.status === "interview") {
-          updated.interviewDate =
-            fields.interviewDate || a.interviewDate || null;
-        } else {
-          updated.interviewDate = null;
-        }
-      }
+      {/* Charts */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="bg-white rounded-xl shadow p-4">
+          <h3 className="font-semibold mb-1">Applications by Status</h3>
+          <p className="text-sm text-gray-500">
+            Total {total > 0 ? `+${Math.round(((interviews + offers + rejections) / total) * 100)}%` : "0%"}
+          </p>
+          <ApplicationStatsBar />
+        </div>
 
-      return updated;
-    });
+        <div className="bg-white rounded-xl shadow p-4">
+          <h3 className="font-semibold mb-1">Application Trends</h3>
+          <p className="text-sm text-gray-500">
+            Last 6 months ({total})
+          </p>
+          <ApplicationStatsLine />
+        </div>
+      </div>
 
-    set({ applications: next });
-    await get().saveAll();
-  },
-
-  // Move to trash (soft delete)
-  deleteApplication: async (id) => {
-    const apps = get().applications;
-    const toDelete = apps.find((a) => a.id === id);
-
-    if (!toDelete) return;
-
-    const nextApps = apps.filter((a) => a.id !== id);
-    const nextTrash = [...get().trash, { ...toDelete, deletedAt: new Date().toISOString() }];
-
-    set({ applications: nextApps, trash: nextTrash });
-    await get().saveAll();
-  },
-
-  // Restore from trash
-  restoreApplication: async (id) => {
-    const trash = get().trash;
-    const toRestore = trash.find((a) => a.id === id);
-
-    if (!toRestore) return;
-
-    const nextTrash = trash.filter((a) => a.id !== id);
-    const nextApps = [...get().applications, toRestore];
-
-    set({ applications: nextApps, trash: nextTrash });
-    await get().saveAll();
-  },
-
-  // Permanently delete
-  permanentlyDelete: async (id) => {
-    const nextTrash = get().trash.filter((a) => a.id !== id);
-    set({ trash: nextTrash });
-    await get().saveAll();
-  },
-
-  // Get stats
-  getStats: () => {
-    const apps = get().applications;
-    return {
-      applied: apps.filter((a) => a.status === "applied").length,
-      interviews: apps.filter((a) => a.status === "interview").length,
-      offers: apps.filter((a) => a.status === "offer").length,
-    };
-  },
-}));
-
-export default useApplicationStore;
+      {/* Quick Actions */}
+      <div className="bg-white rounded-xl shadow p-6 mt-8">
+        <h2 className="text-lg font-semibold mb-4">Quick Actions</h2>
+        <div className="flex gap-4">
+          <button
+            onClick={() => navigate("/applications/add")}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+          >
+            Add Application
+          </button>
+          <button
+            onClick={handleViewApplications}
+            className="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300 transition"
+          >
+            View Applications
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
