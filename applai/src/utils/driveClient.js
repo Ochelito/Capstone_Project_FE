@@ -3,78 +3,118 @@ const SCOPE = "https://www.googleapis.com/auth/drive.file";
 
 let tokenClient = null;
 let accessToken = null;
+let pendingResolve = null;
 
+/**
+ * Initialize Google OAuth token client
+ */
 function initTokenClient() {
-    if (!window.google) throw new Error("Google accounts library is not loaded.");)
-    if (tokenClient) return;
-    tokenClient = window.google.accounts.oauth2.initTokenClient({
-        client_id: CLIENT_ID,
-        scope: SCOPE,
-        callback: (resp) => {
-            accessToken = resp.access_token;
-            if (pendingResolve) {
-                pendingResolve(accessToken);
-                pendingResolve = null;
-            }
-        },
-    }),
+  if (!window.google) throw new Error("Google accounts library is not loaded.");
+  if (tokenClient) return;
+
+  tokenClient = window.google.accounts.oauth2.initTokenClient({
+    client_id: CLIENT_ID,
+    scope: SCOPE,
+    callback: (resp) => {
+      accessToken = resp.access_token;
+      if (pendingResolve) {
+        pendingResolve(accessToken);
+        pendingResolve = null;
+      }
+    },
+  });
 }
 
+/**
+ * Get a valid access token
+ */
+async function getAccessToken() {
+  if (accessToken) return accessToken;
+
+  return new Promise((resolve) => {
+    pendingResolve = resolve;
+    if (!tokenClient) initTokenClient();
+    tokenClient.requestAccessToken();
+  });
+}
+
+/**
+ * Fetch wrapper that automatically includes auth header
+ */
 async function authFetch(url, options = {}) {
-    const token = await getAccessToken();
-    const headers = { ...(options.headers || {}), Authorization: `Bearer ${token}` };
-    return fetch(url, { ...options, headers });
+  const token = await getAccessToken();
+  const headers = {
+    ...(options.headers || {}),
+    Authorization: `Bearer ${token}`,
+  };
+  return fetch(url, { ...options, headers });
 }
 
-export async function ensureFile(filename = "application.json") {
-    //Search by name {root "My Drive"}
-    const search = await authFetch(
-        `https://www.googleapis.com/drive/v3/files?q=name='${encodeURIComponent(
-            filename    
-        )}` and trashed=false%fields=FileSystem(id,name)
-    );
-    const res = await search.json();
-    if (res.files?.length) return res.files[0].id;
+/**
+ * Ensure a Drive file exists; create it if not
+ */
+export async function ensureFile(filename = "applications.json") {
+  const search = await authFetch(
+    `https://www.googleapis.com/drive/v3/files?q=name='${encodeURIComponent(
+      filename
+    )}' and trashed=false&fields=files(id,name)`
+  );
 
-    //create new file with empty array
-    const metadata = { name: filename, mimeType: "application/json" };
-    const boundary = "-------jobs-json-boundary";
-    const body =
-        `--${boundary}\r\n` +
-        `Content-Type: application/json; charset=UTF-8\r\n\r\n` +
-        JSON.stringify(metadata) + `\r\n` +
-        `--${boundary}\r\n` +
-        `Content-Type: application/json; charset=UTF-8\r\n\r\n` +
-        JSON.stringify([]) + `\r\n` +
-        `--${boundary}--`;
+  const res = await search.json();
+  if (res.files?.length) return res.files[0].id;
 
-    const createRes = await authFetch(
-        "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id",
-        { method: "POST", headers: {"Content-Type": `multipart/related; boundary=${boundary}` }, body }
-    );
-    const creted = await createRes.json();
-    return created.id;
+  // Create new file with empty array
+  const metadata = { name: filename, mimeType: "application/json" };
+  const boundary = "-------jobs-json-boundary";
+  const body =
+    `--${boundary}\r\n` +
+    `Content-Type: application/json; charset=UTF-8\r\n\r\n` +
+    JSON.stringify(metadata) +
+    `\r\n` +
+    `--${boundary}\r\n` +
+    `Content-Type: application/json; charset=UTF-8\r\n\r\n` +
+    JSON.stringify([]) +
+    `\r\n` +
+    `--${boundary}--`;
+
+  const createRes = await authFetch(
+    "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id",
+    {
+      method: "POST",
+      headers: { "Content-Type": `multipart/related; boundary=${boundary}` },
+      body,
+    }
+  );
+
+  const created = await createRes.json();
+  return created.id;
 }
 
+/**
+ * Load applications array from Drive file
+ */
 export async function loadApplications(fileId) {
-    const r = await authFetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`);
-    if (!r.ok) return [];
-    const data = await r.json();
+  const r = await authFetch(
+    `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`
+  );
+  if (!r.ok) return [];
+  const data = await r.json();
 
-    //support either [] or { applications: [] }
-    return Array.isArray(data) ? data : data.applications || [];
+  // Support both raw [] or { applications: [] }
+  return Array.isArray(data) ? data : data.applications || [];
 }
 
+/**
+ * Save applications array to Drive file
+ */
 export async function saveApplications(fileId, applicationsArray) {
-    //upload raw JSON (media) with PATCH
-    const r = await authFetch(
-        `https://www.googleapis.com/upload/drive/v3/files/${fileId}?uploadType=media`,
-        {
-            method: "PATCH",
-            headers: { "Content-Type": "application/json; charset=UTF-8"},
-            body: JSON.stringify(applicationsArray),
-        }
-    );
-    if (!r.ok) throw new Error("Failed to save applications");
+  const r = await authFetch(
+    `https://www.googleapis.com/upload/drive/v3/files/${fileId}?uploadType=media`,
+    {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json; charset=UTF-8" },
+      body: JSON.stringify(applicationsArray),
+    }
+  );
+  if (!r.ok) throw new Error("Failed to save applications");
 }
-
