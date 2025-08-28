@@ -25,6 +25,9 @@ function App() {
           <Route path="/applications" element={<Applications />} />
           <Route path="/interviews" element={<Interviews />} />
         </Route>
+        
+        {/* Catch-all Route (public) */}
+        <Route path="*" element={<Login />} />
       </Routes>
     </BrowserRouter>
   );
