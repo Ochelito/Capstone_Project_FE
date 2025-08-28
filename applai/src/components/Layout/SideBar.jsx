@@ -1,6 +1,6 @@
 import React from "react";
 import { NavLink, useNavigate } from "react-router-dom";
-import useAuthStore from "@/store/useAuthStore";
+import useAuthStore from "@/store/authStore";
 import { BarChart2, FileText, Calendar, LogOut } from "lucide-react"; // icons
 
 function SideBar() {

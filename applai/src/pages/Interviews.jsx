@@ -1,7 +1,7 @@
 import React from "react";
 import useApplicationStore from "@/store/applicationStore";
 
-export default function Interview() {
+export default function Interviews() {
   const { applications, updateApplication } = useApplicationStore();
 
   // Filter and sort applications by status

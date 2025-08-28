@@ -1,9 +1,9 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import useApplicationStore from "@/store/applicationStore";
-import useAuthStore from "@/store/useAuthStore";
-import ApplicationStatsBar from "@/components/charts/ApplicationStatsBar";
-import ApplicationStatsLine from "@/components/charts/ApplicationStatsLine";
+import useAuthStore from "@/store/authStore";
+import ApplicationsByStatus from "@/components/charts/ApplicationsByStatus";
+import ApplicationTrends from "@/components/charts/ApplicationTrends";
 
 export default function Dashboard() {
   const { ready, init, applications } = useApplicationStore();
@@ -70,7 +70,7 @@ export default function Dashboard() {
           <p className="text-sm text-gray-500">
             Total {total > 0 ? `+${Math.round(((interviews + offers + rejections) / total) * 100)}%` : "0%"}
           </p>
-          <ApplicationStatsBar />
+          <ApplicationsByStatus />
         </div>
 
         <div className="bg-white rounded-xl shadow p-4">
@@ -78,7 +78,7 @@ export default function Dashboard() {
           <p className="text-sm text-gray-500">
             Last 6 months ({total})
           </p>
-          <ApplicationStatsLine />
+          <ApplicationTrends />
         </div>
       </div>
 

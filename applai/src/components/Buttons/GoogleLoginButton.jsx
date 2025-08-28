@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from "react";
-import googleicon from "./assets/googleicon.svg";
-import useAuthStore from "./store/authStore";
+import googleicon from "@/assets/googleicon.svg";
+import useAuthStore from "@/store/authStore";
 
 function GoogleLoginButton({ onSuccess, allowedEmails = [] }) {
   const buttonRef = useRef(null);

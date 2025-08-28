@@ -1,6 +1,6 @@
 import React from "react";
-import AddApplicationButton from "./components/buttons/AddApplicationButton";
-import ApplicationList from "./components/layout/ApplicationList";
+import AddApplicationButton from "@/components/buttons/AddApplicationButton";
+import ApplicationList from "@/components/layout/ApplicationList";
 
 function Applications() {
   return (

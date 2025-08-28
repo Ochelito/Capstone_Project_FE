@@ -1,7 +1,7 @@
 import React from 'react';
-import LoginForm from './components/Forms/LoginForm';
-import GoogleLoginButton from './components/Buttons/GoogleLoginButton';
-import useAuthStore from '@/store/useAuthStore';
+import LoginForm from '@/components/forms/LoginForm';
+import GoogleLoginButton from '@/components/buttons/GoogleLoginButton';
+import useAuthStore from '@/store/authStore';
 import useApplicationStore from '@/store/applicationStore';
 
 function Login() {
