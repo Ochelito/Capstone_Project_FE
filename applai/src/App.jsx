@@ -4,7 +4,7 @@ import Login from "@/pages/Login";
 import Dashboard from "@/pages/Dashboard";
 import Applications from "@/pages/Applications";
 import Interviews from "@/pages/Interviews";
-import ProtectedRoute from "@/components/auth/ProtectedRoute";
+import ProtectedRoute from "@/routes/ProtectedRoute";
 
 function App() {
   return (
