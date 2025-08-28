@@ -1,13 +1,16 @@
 import React, { useEffect, useRef } from "react";
 import googleicon from "@/assets/googleicon.svg";
 import useAuthStore from "@/store/authStore";
+import useApplicationStore from "@/store/applicationStore";
+import { useNavigate } from "react-router-dom";
 
-function GoogleLoginButton({ onSuccess, allowedEmails = [] }) {
+function GoogleLoginButton() {
   const buttonRef = useRef(null);
   const login = useAuthStore((state) => state.login);
+  const initAppStore = useApplicationStore((state) => state.init);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    /* global google */
     if (!window.google) {
       alert("Google login is not available right now. Please refresh or try again later.");
       return;
@@ -15,85 +18,75 @@ function GoogleLoginButton({ onSuccess, allowedEmails = [] }) {
 
     if (buttonRef.current) {
       window.google.accounts.id.initialize({
-        client_id: "174014466302-2l3he8lepnhou7uei48a6jj4jj5rdnns.apps.googleusercontent.com", // Replace with your actual client ID
-        callback: handleCredentialResponse
+        client_id: "YOUR_GOOGLE_CLIENT_ID", // replace with your actual client ID
+        callback: handleCredentialResponse,
       });
 
-      window.google.accounts.id.renderButton(
-        buttonRef.current,
-        { theme: "outline", 
-          size: "large", 
-          text: "continue_with" }
-      );
+      window.google.accounts.id.renderButton(buttonRef.current, {
+        theme: "outline",
+        size: "large",
+        text: "continue_with",
+      });
     }
   }, []);
 
-  function handleCredentialResponse(response) {
+  const handleCredentialResponse = async (response) => {
     try {
       const data = parseJwt(response.credential);
-      
-      //sign user in immediately
-      if (!data.email || !validateEmailFormat(data.email)) {
-        alert("Invalid email format. Please use a valid email address.");
+
+      if (!data.email || !data.email_verified) {
+        alert("Invalid or unverified email. Please use a valid Google account.");
         return;
       }
 
+      // Build user object
+      const user = {
+        email: data.email,
+        name: data.name,
+        picture: data.picture || null,
+      };
 
-      if (!data.email_verified) {
-        alert("Email not verified. Please verify your Google account.");
-        return;
-      }
+      // 🔹 Log in user
+      login(user, "google");
 
-      if (allowedEmails.length > 0 && !allowedEmails.includes(data.email)) {
-        alert("Email not allowed. Please use an authorized email address.");
-        return;
-      }
+      // 🔹 Initialize Google Drive application store
+      await initAppStore("drive");
 
-      login({ name: data.name, email: data.email});
-   
-      alert(`Welcome ${data.name}!`);
-      // Here you can handle the login logic, e.g., send data to your server or
-      if (onSuccess) onSuccess(data);
-    } catch (error) {
-      console.error("Error parsing Google response:", error);
-      alert("Login failed. Please try again.");
+      // 🔹 Redirect to dashboard
+      navigate("/dashboard");
+    } catch (err) {
+      console.error(err);
+      alert("Google login failed. Please try again.");
     }
-  }
+  };
 
+  // helper to decode GIS JWT
   function parseJwt(token) {
     const base64Url = token.split(".")[1];
     const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
-    return JSON.parse(window.atob(base64));
+    const jsonPayload = decodeURIComponent(
+      atob(base64)
+        .split("")
+        .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+        .join("")
+    );
+    return JSON.parse(jsonPayload);
   }
 
-  function validateEmailFormat(email) {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-  }
-
-  function handleLoginClick() {
+  const handleLoginClick = () => {
     if (window.google) {
-      window.google.accounts.id.prompt(); //opens google sing-in popup
-    } 
-  }
+      window.google.accounts.id.prompt(); // opens Google One Tap / popup
+    }
+  };
 
   return (
-    <button 
+    <button
+      ref={buttonRef}
       onClick={handleLoginClick}
-      style={{ 
-        display: "flex", 
-        alignItems: "center",  
-        gap: "8px", 
-        padding: "10px 20px", 
-        background: "#fff", 
-        borderRadius: "4px", 
-        border: "1px solid #ccc",
-        boxShadow: "0 2px 4px rgba(0,0,0,0.1)", 
-        cursor: "pointer" 
-      }}>
-      <img 
-        src={googleicon} 
-        alt="Google Icon" 
+    >
+      <img
+        src={googleicon}
+        alt="Google Icon"
         style={{ width: "18px", height: "18px", marginLeft: "8px" }}
       />
     </button>

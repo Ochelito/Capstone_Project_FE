@@ -11,56 +11,54 @@ function Login() {
   const initApplications = useApplicationStore((state) => state.init);
   const navigate = useNavigate();
 
-  // 🔹 If already logged in, redirect immediately
+  // 🔹 Redirect immediately if already logged in
   useEffect(() => {
     if (isAuthenticated) {
-      navigate("/dashboard"); // redirect to dashboard
+      navigate("/dashboard");
     }
   }, [isAuthenticated, navigate]);
 
-  const handleEmailLogin = (email) => {
-    // Authenticate email/password (dummy example here)
-    login({ email }, "local");
-    initApplications("local"); // load from localStorage
-    navigate("/dashboard"); // 🔹 redirect after login
+  // 🔹 Handles GIS login for local (email/password) login
+  const handleEmailLogin = async (userData) => {
+    login(userData, "local");         // store user in authStore
+    await initApplications("local");  // load apps from localStorage
+    navigate("/dashboard");
   };
 
-  const handleGoogleLogin = (userData) => {
-    login({ ...userData }, "google");
-    initApplications("drive"); // load from Google Drive
-    navigate("/dashboard"); // 🔹 redirect after login
+  // 🔹 Handles GIS login for Google button
+  const handleGoogleLogin = async (userData) => {
+    login(userData, "google");        // store user in authStore
+    await initApplications("drive");  // load apps from Google Drive
+    navigate("/dashboard");
   };
 
   return (
-    <div className="login-page">
-      <div>
-        <img src="./assets/logo.png" alt="Logo" />
-        <h1>Start tracking your Job Applications for FREE</h1>
-        <p>
-          Register automatically with your Google Account credentials or Login
-          if an existing User.
+    <div className="login-page flex flex-col md:flex-row items-center justify-center gap-8 p-8">
+      {/* Left side: login form / google login */}
+      <div className="flex-1 max-w-md flex flex-col gap-6">
+        <img src="/assets/logo.png" alt="Logo" className="h-12 w-12" />
+        <h1 className="text-2xl font-bold">Start tracking your Job Applications for FREE</h1>
+        <p className="text-gray-600">
+          Register automatically with your Google Account credentials or Use Google Login Button at the buttom
         </p>
 
+        {/* 🔹 Email/password login */}
         <LoginForm onLogin={handleEmailLogin} />
-        <button
-          onClick={() =>
-            handleEmailLogin(document.getElementById("email").value)
-          }
-        >
-          Login
-        </button>
 
-        <div>
-          <span></span>
-          <p>or continue with</p>
-          <span></span>
+        {/* Divider */}
+        <div className="flex items-center gap-2">
+          <span className="flex-1 h-px bg-gray-300"></span>
+          <p className="text-gray-500 text-sm">To Access Your Application Info Accross Mulitple Devices</p>
+          <span className="flex-1 h-px bg-gray-300"></span>
         </div>
 
+        {/* 🔹 Google login */}
         <GoogleLoginButton onSuccess={handleGoogleLogin} />
       </div>
 
-      <div className="login-image">
-        <img src="./assets/login-image.png" />
+      {/* Right side: image */}
+      <div className="flex-1 hidden md:flex justify-center">
+        <img src="/assets/login-image.png" alt="Login illustration" className="max-w-sm" />
       </div>
     </div>
   );

@@ -50,18 +50,20 @@ function Header() {
 
         {/* Profile */}
         <div className="flex items-center gap-2">
-          {user?.photoURL ? (
+          {user?.picture ? (
             <img
-              src={user.photoURL}
+              src={user.picture}
               alt="Profile"
               className="h-8 w-8 rounded-full object-cover"
             />
           ) : (
             <div className="h-8 w-8 rounded-full bg-gray-400 flex items-center justify-center text-white">
-              {user?.email?.[0].toUpperCase() || "U"}
+              {user?.name?.[0].toUpperCase() || "U"}
             </div>
           )}
-          <span className="text-gray-700 font-medium">{user?.email?.split("@")[0]}</span>
+          <span className="text-gray-700 font-medium">
+            {user?.name || user?.email?.split("@")[0]}
+          </span>
         </div>
       </div>
     </header>
