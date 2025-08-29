@@ -19,34 +19,50 @@ export default function Interviews() {
   const getStatusClass = (status) => {
     switch (status) {
       case "interview":
-        return "bg-white border-l-4 border-blue-500";
+        return "bg-purple-50 border-l-4 border-purple-400";
       case "offer":
-        return "bg-green-100 border-l-4 border-green-500";
+        return "bg-purple-100 border-l-4 border-purple-500";
       case "rejected":
-        return "bg-red-100 border-l-4 border-red-500";
+        return "bg-purple-200 border-l-4 border-purple-600";
       default:
-        return "bg-white";
+        return "bg-purple-50";
+    }
+  };
+
+  const getBadgeClass = (status) => {
+    switch (status) {
+      case "interview":
+        return "text-purple-800 bg-purple-200";
+      case "offer":
+        return "text-purple-900 bg-purple-300";
+      case "rejected":
+        return "text-purple-700 bg-purple-100";
+      default:
+        return "text-black bg-gray-100";
     }
   };
 
   return (
-    <div className="p-6 space-y-4">
-      <h1 className="text-2xl font-bold">Interviews</h1>
+    <div className="p-6 space-y-4 bg-white min-h-screen">
+      <h1 className="text-2xl font-bold text-black">Interviews</h1>
 
-      {sortedApps.length === 0 && <p>No upcoming interviews.</p>}
+      {sortedApps.length === 0 && <p className="text-gray-600">No upcoming interviews.</p>}
 
       <ul className="space-y-3">
         {sortedApps.map(app => (
-          <li key={app.id} className={`p-4 rounded shadow flex justify-between items-center ${getStatusClass(app.status)}`}>
+          <li
+            key={app.id}
+            className={`p-4 rounded-xl shadow hover:shadow-lg flex justify-between items-center transition ${getStatusClass(app.status)}`}
+          >
             <div>
-              <p className="font-semibold">{app.position} @ {app.company}</p>
+              <p className="font-semibold text-black">{app.position} @ {app.company}</p>
 
               {app.status === "interview" && app.interviewDate && (
-                <p className="text-sm text-gray-500">Date: {new Date(app.interviewDate).toLocaleDateString()}</p>
+                <p className="text-sm text-gray-600">Date: {new Date(app.interviewDate).toLocaleDateString()}</p>
               )}
 
               {app.status === "interview" && (
-                <span className="inline-block mt-1 px-2 py-0.5 text-xs font-semibold text-blue-800 bg-blue-200 rounded-full">
+                <span className={`inline-block mt-1 px-2 py-0.5 text-xs font-semibold rounded-full ${getBadgeClass(app.status)}`}>
                   Upcoming
                 </span>
               )}
@@ -57,13 +73,13 @@ export default function Interviews() {
                 <>
                   <button
                     onClick={() => handleStatusChange(app.id, "offer")}
-                    className="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600 transition"
+                    className="px-3 py-1 bg-purple-300 text-black rounded hover:bg-purple-400 transition"
                   >
                     Offer
                   </button>
                   <button
                     onClick={() => handleStatusChange(app.id, "rejected")}
-                    className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition"
+                    className="px-3 py-1 bg-purple-200 text-black rounded hover:bg-purple-300 transition"
                   >
                     Reject
                   </button>
@@ -71,7 +87,7 @@ export default function Interviews() {
               )}
 
               {(app.status === "offer" || app.status === "rejected") && (
-                <span className="px-3 py-1 rounded font-semibold">
+                <span className={`px-3 py-1 rounded font-semibold ${getBadgeClass(app.status)}`}>
                   {app.status.toUpperCase()}
                 </span>
               )}

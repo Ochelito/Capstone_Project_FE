@@ -17,13 +17,12 @@ function parseDate(d) {
 }
 
 function monthKey(date) {
-  return `${date.getFullYear()}-${date.getMonth()}`; // e.g. "2025-7"
+  return `${date.getFullYear()}-${date.getMonth()}`;
 }
 
 export default function ApplicationsByStatus() {
   const applications = useApplicationStore((s) => s.applications);
 
-  // ---- Bar data (overall counts by status) ----
   const data = useMemo(() => {
     const counts = { applied: 0, interview: 0, offer: 0, rejected: 0 };
     for (const a of applications) {
@@ -41,7 +40,6 @@ export default function ApplicationsByStatus() {
     ];
   }, [applications]);
 
-  // ---- Subtext: "Total +X%" (this month vs last month) ----
   const pctLabel = useMemo(() => {
     const now = new Date();
     const thisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -70,17 +68,23 @@ export default function ApplicationsByStatus() {
   }, [applications]);
 
   return (
-    <div className="w-full h-80 bg-white rounded-xl shadow p-4">
-      <h3 className="font-semibold mb-1">Applications by Status</h3>
-      <p className="text-sm text-gray-500">Total {pctLabel}</p>
+    <div className="w-full h-80 bg-purple-50 rounded-xl shadow-lg p-4">
+      <h3 className="text-black font-semibold mb-1 text-lg">Applications by Status</h3>
+      <p className="text-gray-600 text-sm mb-3">Total {pctLabel}</p>
 
       <ResponsiveContainer width="100%" height="100%">
-        <BarChart data={data} margin={{ top: 8, right: 8, left: 0, bottom: 8 }}>
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="name" />
-          <YAxis allowDecimals={false} />
-          <Tooltip />
-          <Bar dataKey="count" fill="#2563eb" radius={[8, 8, 0, 0]} />
+        <BarChart
+          data={data}
+          margin={{ top: 8, right: 8, left: 0, bottom: 8 }}
+        >
+          <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
+          <XAxis dataKey="name" tick={{ fill: "#000" }} />
+          <YAxis allowDecimals={false} tick={{ fill: "#000" }} />
+          <Tooltip
+            contentStyle={{ backgroundColor: "#fff", borderRadius: "8px", borderColor: "#E5E7EB" }}
+            itemStyle={{ color: "#000" }}
+          />
+          <Bar dataKey="count" fill="#C3B1E1" radius={[8, 8, 0, 0]} />
         </BarChart>
       </ResponsiveContainer>
     </div>

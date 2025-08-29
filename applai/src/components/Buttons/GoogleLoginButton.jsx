@@ -30,6 +30,7 @@ function GoogleLoginButton() {
         theme: "outline",
         size: "large",
         text: "continue_with",
+        shape: "pill", // makes it rounded
       });
     }
   }, []);
@@ -49,13 +50,8 @@ function GoogleLoginButton() {
         picture: data.picture || null,
       };
 
-      // 🔑 make sure we wait for store update
       await login(user, "google");
-
-      // Initialize app store after login is confirmed
       await initAppStore("drive");
-
-      // Navigate only after login + store init
       navigate("/dashboard", { replace: true });
     } catch (err) {
       console.error("Google login failed:", err);
@@ -77,7 +73,14 @@ function GoogleLoginButton() {
     return JSON.parse(jsonPayload);
   }
 
-  return <div ref={buttonRef}></div>;
+  return (
+    <div className="flex justify-center mt-4">
+      <div
+        ref={buttonRef}
+        className="shadow-md rounded-xl p-1 bg-white hover:shadow-lg transition"
+      ></div>
+    </div>
+  );
 }
 
 export default GoogleLoginButton;
