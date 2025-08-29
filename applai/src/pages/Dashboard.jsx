@@ -7,7 +7,8 @@ import ApplicationTrends from "@/components/charts/ApplicationTrends";
 
 export default function Dashboard() {
   const { ready, init, applications } = useApplicationStore();
-  const { user, loginMethod } = useAuthStore(); // loginMethod: "google" or "local"
+  const { user, loginMethod, logout } = useAuthStore();
+  const displayName = useAuthStore((state) => state.displayName); // 🔹 Get from authStore
   const navigate = useNavigate();
 
   // 🔹 Initialize applications based on login type
@@ -19,9 +20,6 @@ export default function Dashboard() {
   }, [ready, init, loginMethod]);
 
   if (!ready) return <div className="p-6">Loading dashboard…</div>;
-
-  // 🔹 Greeting: prefer username, fallback to name/email for Google login
-  const username = user?.username || user?.name || (user?.email ? user.email.split("@")[0] : "Guest");
 
   // 🔹 Stats
   const total = applications.length;
@@ -42,7 +40,7 @@ export default function Dashboard() {
     <div className="p-6 space-y-8">
       {/* Header */}
       <h1 className="text-2xl font-bold">Dashboard</h1>
-      <p className="text-gray-600">Welcome back, {username}</p>
+      <p className="text-gray-600">Welcome back, {displayName}</p>
 
       {/* Stats boxes */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">

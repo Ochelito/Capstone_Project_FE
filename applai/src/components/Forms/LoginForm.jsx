@@ -1,84 +1,79 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import useAuthStore from "@/store/authStore";
 import useApplicationStore from "@/store/applicationStore";
-import { useNavigate } from "react-router-dom";
 
 export default function LoginForm({ onLogin }) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const navigate = useNavigate();
+  const [error, setError] = useState(null); // 🔹 local error state
+
   const login = useAuthStore((state) => state.login);
   const initAppStore = useApplicationStore((state) => state.init);
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    // 🔹 Validation
-    if (username.length < 8) {
-      alert("Username must be at least 8 characters long.");
-      return;
-    }
-    if (password.length < 6) {
-      alert("Password must be at least 6 characters long.");
-      return;
-    }
+    setError(null); // clear previous error
 
     try {
-      const userKey = `jobtracker_user_${username}`;
-      const storedData = JSON.parse(localStorage.getItem(userKey));
-
-      let user;
-      if (storedData) {
-        // Returning user: verify password
-        if (storedData.password !== password) {
-          alert("Incorrect password for this username.");
-          return;
-        }
-        user = {
-          username,
-          picture: storedData.picture || null,
-        };
-      } else {
-        // New user: create entry
-        user = { username, picture: null };
-        localStorage.setItem(userKey, JSON.stringify({ username, password, picture: null }));
+      // ✅ Validation
+      if (username.trim().length < 8) {
+        throw new Error("Username must be at least 8 characters.");
+      }
+      if (password.trim().length < 6) {
+        throw new Error("Password must be at least 6 characters.");
       }
 
-      // 🔹 Store user in authStore
-      login(user, "local");
+      // ✅ Build user object
+      const userData = {
+        username: username.trim(),
+        password: password.trim(), 
+        picture: null,
+      };
 
-      // 🔹 Initialize application store from localStorage
+      // ✅ Store user in Zustand
+      login(userData, "local");
+
+      // ✅ Init application state
       await initAppStore("local");
 
-      // 🔹 Optional callback
-      if (onLogin) onLogin(user);
+      // ✅ Optional callback
+      if (onLogin) onLogin(userData);
 
-      // 🔹 Navigate to dashboard
+      // ✅ Navigate
       navigate("/dashboard");
     } catch (err) {
-      console.error(err);
-      alert("Login failed. Please try again.");
+      setError(err.message || "Something went wrong. Please try again.");
     }
   };
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+      {error && (
+        <div className="bg-red-100 text-red-700 p-2 rounded text-sm">
+          {error}
+        </div>
+      )}
+
       <input
         type="text"
-        placeholder="Username"
+        placeholder="Username (min 8 chars)"
         value={username}
         onChange={(e) => setUsername(e.target.value)}
         className="p-2 border rounded"
         required
       />
+
       <input
         type="password"
-        placeholder="Password"
+        placeholder="Password (min 6 chars)"
         value={password}
         onChange={(e) => setPassword(e.target.value)}
         className="p-2 border rounded"
         required
       />
+
       <button
         type="submit"
         className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600"

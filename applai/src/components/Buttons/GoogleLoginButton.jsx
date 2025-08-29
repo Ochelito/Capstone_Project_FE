@@ -4,7 +4,7 @@ import useApplicationStore from "@/store/applicationStore";
 import { useNavigate } from "react-router-dom";
 
 function GoogleLoginButton() {
-  const buttonRef = useRef(null); // container for the Google button
+  const buttonRef = useRef(null);
   const login = useAuthStore((state) => state.login);
   const initAppStore = useApplicationStore((state) => state.init);
   const navigate = useNavigate();
@@ -19,11 +19,12 @@ function GoogleLoginButton() {
 
     // Initialize Google Identity Services
     window.google.accounts.id.initialize({
-      client_id: "174014466302-2l3he8lepnhou7uei48a6jj4jj5rdnns.apps.googleusercontent.com",
+      client_id:
+        "174014466302-2l3he8lepnhou7uei48a6jj4jj5rdnns.apps.googleusercontent.com",
       callback: handleCredentialResponse,
     });
 
-    // Render Google button inside the div
+    // Render Google button
     if (buttonRef.current) {
       window.google.accounts.id.renderButton(buttonRef.current, {
         theme: "outline",
@@ -48,11 +49,16 @@ function GoogleLoginButton() {
         picture: data.picture || null,
       };
 
-      login(user, "google");
+      // 🔑 make sure we wait for store update
+      await login(user, "google");
+
+      // Initialize app store after login is confirmed
       await initAppStore("drive");
-      navigate("/dashboard");
+
+      // Navigate only after login + store init
+      navigate("/dashboard", { replace: true });
     } catch (err) {
-      console.error(err);
+      console.error("Google login failed:", err);
       alert("Google login failed. Please try again.");
     }
   };
@@ -63,7 +69,9 @@ function GoogleLoginButton() {
     const jsonPayload = decodeURIComponent(
       atob(base64)
         .split("")
-        .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+        .map(
+          (c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2)
+        )
         .join("")
     );
     return JSON.parse(jsonPayload);

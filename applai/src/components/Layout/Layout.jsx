@@ -4,17 +4,17 @@ import Header from "@/components/layout/Header";
 
 function Layout() {
   return (
-    <div className="layout">
+    <div className="min-h-screen bg-white text-black flex flex-col">
       {/* Header at the top */}
       <Header />
 
       {/* Container for sidebar + main content */}
-      <div className="layout-body">
+      <div className="flex flex-1">
         {/* Sidebar on the left */}
-        <SideBar />
+        <SideBar className="w-64 bg-purple-100" />
 
         {/* Main content to the right of sidebar */}
-        <main className="main-content">
+        <main className="flex-1 p-6">
           <Outlet />
         </main>
       </div>
