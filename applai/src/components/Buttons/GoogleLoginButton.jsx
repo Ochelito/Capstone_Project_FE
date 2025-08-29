@@ -5,23 +5,27 @@ import useApplicationStore from "@/store/applicationStore";
 import { useNavigate } from "react-router-dom";
 
 function GoogleLoginButton() {
-  const buttonRef = useRef(null);
+  const buttonRef = useRef(null); // container for the Google button
   const login = useAuthStore((state) => state.login);
   const initAppStore = useApplicationStore((state) => state.init);
   const navigate = useNavigate();
 
   useEffect(() => {
     if (!window.google) {
-      alert("Google login is not available right now. Please refresh or try again later.");
+      alert(
+        "Google login is not available right now. Please refresh or try again later."
+      );
       return;
     }
 
-    if (buttonRef.current) {
-      window.google.accounts.id.initialize({
-        client_id: "YOUR_GOOGLE_CLIENT_ID", // replace with your actual client ID
-        callback: handleCredentialResponse,
-      });
+    // Initialize Google Identity Services
+    window.google.accounts.id.initialize({
+      client_id: "174014466302-2l3he8lepnhou7uei48a6jj4jj5rdnns.apps.googleusercontent.com", // ✅ client_id as string
+      callback: handleCredentialResponse,
+    });
 
+    // Render Google button inside the div
+    if (buttonRef.current) {
       window.google.accounts.id.renderButton(buttonRef.current, {
         theme: "outline",
         size: "large",
@@ -39,20 +43,17 @@ function GoogleLoginButton() {
         return;
       }
 
-      // Build user object
       const user = {
         email: data.email,
-        name: data.name,
+        name: data.name || data.email.split("@")[0],
         picture: data.picture || null,
       };
 
-      // 🔹 Log in user
+      // Log in and init Google Drive store
       login(user, "google");
-
-      // 🔹 Initialize Google Drive application store
       await initAppStore("drive");
 
-      // 🔹 Redirect to dashboard
+      // Redirect to dashboard
       navigate("/dashboard");
     } catch (err) {
       console.error(err);
@@ -60,7 +61,7 @@ function GoogleLoginButton() {
     }
   };
 
-  // helper to decode GIS JWT
+  // decode JWT
   function parseJwt(token) {
     const base64Url = token.split(".")[1];
     const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
@@ -73,23 +74,27 @@ function GoogleLoginButton() {
     return JSON.parse(jsonPayload);
   }
 
+  // manual popup trigger
   const handleLoginClick = () => {
     if (window.google) {
-      window.google.accounts.id.prompt(); // opens Google One Tap / popup
+      window.google.accounts.id.prompt(); // ✅ manual popup
     }
   };
 
   return (
-    <button
-      ref={buttonRef}
-      onClick={handleLoginClick}
-    >
-      <img
-        src={googleicon}
-        alt="Google Icon"
-        style={{ width: "18px", height: "18px", marginLeft: "8px" }}
-      />
-    </button>
+    <div className="flex items-center gap-2">
+      {/* div container for the Google button */}
+      <div ref={buttonRef}></div>
+
+      {/* Optional extra clickable icon */}
+      <button onClick={handleLoginClick}>
+        <img
+          src={googleicon}
+          alt="Google Icon"
+          style={{ width: "18px", height: "18px" }}
+        />
+      </button>
+    </div>
   );
 }
 

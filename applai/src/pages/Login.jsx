@@ -18,28 +18,28 @@ function Login() {
     }
   }, [isAuthenticated, navigate]);
 
-  // 🔹 Handles GIS login for local (email/password) login
+  // 🔹 Handles local login from LoginForm
   const handleEmailLogin = async (userData) => {
-    login(userData, "local");         // store user in authStore
-    await initApplications("local");  // load apps from localStorage
-    navigate("/dashboard");
+    login(userData, "email");          // store user in authStore
+    await initApplications("local");    // load apps from localStorage
+    navigate("/dashboard");             // redirect to dashboard
   };
 
-  // 🔹 Handles GIS login for Google button
+  // 🔹 Handles Google login
   const handleGoogleLogin = async (userData) => {
-    login(userData, "google");        // store user in authStore
-    await initApplications("drive");  // load apps from Google Drive
-    navigate("/dashboard");
+    login(userData, "google");          // store user in authStore
+    await initApplications("drive");    // load apps from Google Drive
+    navigate("/dashboard");             // redirect to dashboard
   };
 
   return (
     <div className="login-page flex flex-col md:flex-row items-center justify-center gap-8 p-8">
-      {/* Left side: login form / google login */}
+      {/* Left side: login form / Google login */}
       <div className="flex-1 max-w-md flex flex-col gap-6">
         <img src="/assets/logo.png" alt="Logo" className="h-12 w-12" />
         <h1 className="text-2xl font-bold">Start tracking your Job Applications for FREE</h1>
         <p className="text-gray-600">
-          Register automatically with your Google Account credentials or Use Google Login Button at the buttom
+          Login with your email to access your applications or continue with Google for cloud sync.
         </p>
 
         {/* 🔹 Email/password login */}
@@ -48,7 +48,7 @@ function Login() {
         {/* Divider */}
         <div className="flex items-center gap-2">
           <span className="flex-1 h-px bg-gray-300"></span>
-          <p className="text-gray-500 text-sm">To Access Your Application Info Accross Mulitple Devices</p>
+          <p className="text-gray-500 text-sm">To access your applications across multiple devices</p>
           <span className="flex-1 h-px bg-gray-300"></span>
         </div>
 
@@ -56,7 +56,7 @@ function Login() {
         <GoogleLoginButton onSuccess={handleGoogleLogin} />
       </div>
 
-      {/* Right side: image */}
+      {/* Right side: illustration */}
       <div className="flex-1 hidden md:flex justify-center">
         <img src="/assets/login-image.png" alt="Login illustration" className="max-w-sm" />
       </div>

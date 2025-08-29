@@ -3,59 +3,57 @@ import useAuthStore from "@/store/authStore";
 import useApplicationStore from "@/store/applicationStore";
 import { useNavigate } from "react-router-dom";
 
-export default function LoginForm() {
-  const [email, setEmail] = useState("");
+export default function LoginForm({ onLogin }) {
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const navigate = useNavigate();
   const login = useAuthStore((state) => state.login);
   const initAppStore = useApplicationStore((state) => state.init);
-  const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!email || !password) {
-      alert("Please enter both email and password.");
+    // 🔹 Validation
+    if (username.length < 8) {
+      alert("Username must be at least 8 characters long.");
+      return;
+    }
+    if (password.length < 6) {
+      alert("Password must be at least 6 characters long.");
       return;
     }
 
-    if (!window.google) {
-      alert("Google login is not available. Please try again later.");
-      return;
-    }
-
-    // 🔹 Initialize GIS to validate email and get user profile
-    window.google.accounts.id.initialize({
-      client_id: "YOUR_GOOGLE_CLIENT_ID", // replace with your actual client ID
-      callback: handleCredentialResponse,
-    });
-
-    // 🔹 Prompt GIS
-    window.google.accounts.id.prompt();
-  };
-
-  const handleCredentialResponse = async (response) => {
     try {
-      const data = parseJwt(response.credential);
+      const userKey = `jobtracker_user_${username}`;
+      const storedData = JSON.parse(localStorage.getItem(userKey));
 
-      if (!data.email || !data.email_verified) {
-        alert("Invalid or unverified email. Please use a valid Google account.");
-        return;
+      let user;
+      if (storedData) {
+        // Returning user: verify password
+        if (storedData.password !== password) {
+          alert("Incorrect password for this username.");
+          return;
+        }
+        user = {
+          username,
+          picture: storedData.picture || null,
+        };
+      } else {
+        // New user: create entry
+        user = { username, picture: null };
+        localStorage.setItem(userKey, JSON.stringify({ username, password, picture: null }));
       }
 
-      // Build user object
-      const user = {
-        email: data.email,
-        name: data.name || email.split("@")[0],
-        picture: data.picture || null,
-      };
+      // 🔹 Store user in authStore
+      login(user, "local");
 
-      // 🔹 Log in user
-      login(user, "email");
-
-      // 🔹 Initialize local application store
+      // 🔹 Initialize application store from localStorage
       await initAppStore("local");
 
-      // 🔹 Redirect to dashboard
+      // 🔹 Optional callback
+      if (onLogin) onLogin(user);
+
+      // 🔹 Navigate to dashboard
       navigate("/dashboard");
     } catch (err) {
       console.error(err);
@@ -63,26 +61,13 @@ export default function LoginForm() {
     }
   };
 
-  // helper to decode GIS JWT
-  function parseJwt(token) {
-    const base64Url = token.split(".")[1];
-    const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
-    const jsonPayload = decodeURIComponent(
-      atob(base64)
-        .split("")
-        .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
-        .join("")
-    );
-    return JSON.parse(jsonPayload);
-  }
-
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
       <input
-        type="email"
-        placeholder="Email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
+        type="text"
+        placeholder="Username"
+        value={username}
+        onChange={(e) => setUsername(e.target.value)}
         className="p-2 border rounded"
         required
       />
