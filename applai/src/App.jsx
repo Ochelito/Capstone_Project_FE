@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
 import Login from "@/pages/Login";
 import Dashboard from "@/pages/Dashboard";
@@ -13,20 +13,19 @@ function App() {
         {/* Public Route */}
         <Route path="/login" element={<Login />} />
 
-        {/* Protected Routes */}
-        <Route
-          element={
-            <ProtectedRoute>
-              <Layout />
-            </ProtectedRoute>
-          }
-        >
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/applications" element={<Applications />} />
-          <Route path="/interviews" element={<Interviews />} />
+        {/* Protected routes */}
+        <Route element={<ProtectedRoute />}>
+          {/* Layout wraps the main pages */}
+          <Route element={<Layout />}>
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/applications" element={<Applications />} />
+            <Route path="/interviews" element={<Interviews />} />
+            {/* redirect root to dashboard */}
+            <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          </Route>
         </Route>
-        
-        {/* Catch-all Route (public) */}
+
+        {/* Catch-all route */}
         <Route path="*" element={<Login />} />
       </Routes>
     </BrowserRouter>

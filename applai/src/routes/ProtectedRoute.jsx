@@ -1,8 +1,8 @@
 import React from "react";
-import { Navigate } from "react-router-dom";
+import { Navigate, Outlet } from "react-router-dom";
 import useAuthStore from "@/store/authStore";
 
-function ProtectedRoute({ children }) {
+function ProtectedRoute() {
   const user = useAuthStore((state) => state.user);
 
   if (!user) {
@@ -10,8 +10,8 @@ function ProtectedRoute({ children }) {
     return <Navigate to="/login" replace />;
   }
 
-  // 🔹 Logged in → show requested page
-  return children;
+  // 🔹 Logged in → render nested routes
+  return <Outlet />;
 }
 
 export default ProtectedRoute;

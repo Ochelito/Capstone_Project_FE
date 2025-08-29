@@ -1,5 +1,4 @@
 import React, { useEffect, useRef } from "react";
-import googleicon from "@/assets/googleicon.svg";
 import useAuthStore from "@/store/authStore";
 import useApplicationStore from "@/store/applicationStore";
 import { useNavigate } from "react-router-dom";
@@ -20,7 +19,7 @@ function GoogleLoginButton() {
 
     // Initialize Google Identity Services
     window.google.accounts.id.initialize({
-      client_id: "174014466302-2l3he8lepnhou7uei48a6jj4jj5rdnns.apps.googleusercontent.com", // ✅ client_id as string
+      client_id: "174014466302-2l3he8lepnhou7uei48a6jj4jj5rdnns.apps.googleusercontent.com",
       callback: handleCredentialResponse,
     });
 
@@ -49,11 +48,8 @@ function GoogleLoginButton() {
         picture: data.picture || null,
       };
 
-      // Log in and init Google Drive store
       login(user, "google");
       await initAppStore("drive");
-
-      // Redirect to dashboard
       navigate("/dashboard");
     } catch (err) {
       console.error(err);
@@ -61,7 +57,6 @@ function GoogleLoginButton() {
     }
   };
 
-  // decode JWT
   function parseJwt(token) {
     const base64Url = token.split(".")[1];
     const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
@@ -74,28 +69,7 @@ function GoogleLoginButton() {
     return JSON.parse(jsonPayload);
   }
 
-  // manual popup trigger
-  const handleLoginClick = () => {
-    if (window.google) {
-      window.google.accounts.id.prompt(); // ✅ manual popup
-    }
-  };
-
-  return (
-    <div className="flex items-center gap-2">
-      {/* div container for the Google button */}
-      <div ref={buttonRef}></div>
-
-      {/* Optional extra clickable icon */}
-      <button onClick={handleLoginClick}>
-        <img
-          src={googleicon}
-          alt="Google Icon"
-          style={{ width: "18px", height: "18px" }}
-        />
-      </button>
-    </div>
-  );
+  return <div ref={buttonRef}></div>;
 }
 
 export default GoogleLoginButton;
