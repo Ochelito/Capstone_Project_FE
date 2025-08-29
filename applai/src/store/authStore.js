@@ -4,30 +4,33 @@ import { persist } from "zustand/middleware";
 const useAuthStore = create(
   persist(
     (set, get) => ({
-      user: null,           // stores user object {email, name, picture}
-      loginMethod: null,    // "google" or "email"
+      user: null,           // { username, email, name, picture }
+      loginMethod: null,    // "google" or "local"
 
-      // 🔹 log in user and set method
-      login: (userData, method) =>
-        set({
-          user: {
-            email: userData.email,
-            name: userData.name,
-            picture: userData.picture, // profile photo if provided
-          },
+      // 🔹 log in user and persist
+      login: (userData, method) => {
+        const user =
+          method === "local"
+            ? { username: userData.username, picture: userData.picture || null }
+            : { email: userData.email, name: userData.name, picture: userData.picture || null };
+
+        set(() => ({
+          user,
           loginMethod: method,
-        }),
+        }));
+      },
 
-      // 🔹 log out user and clear method
-      logout: () => set({ user: null, loginMethod: null }),
+      // 🔹 log out user
+      logout: () => set(() => ({ user: null, loginMethod: null })),
 
-      // 🔹 computed: is user authenticated?
+      // 🔹 computed
       get isAuthenticated() {
         return get().user !== null;
       },
     }),
     {
-      name: "auth-storage", // key name in localStorage
+      name: "auth-storage", // localStorage key
+      partialize: (state) => ({ user: state.user, loginMethod: state.loginMethod }),
     }
   )
 );
