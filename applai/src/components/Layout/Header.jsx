@@ -6,13 +6,32 @@ function Header() {
   const { user } = useAuthStore();
   const { applications } = useApplicationStore();
 
-  // Count upcoming interviews for notification bell
-  const upcomingInterviews = applications.filter(
-    (app) =>
-      app.status === "interview" &&
-      app.interviewDate &&
-      new Date(app.interviewDate) >= new Date()
-  ).length;
+  const now = new Date();
+
+  // 🔹 Compute notifications for interviews based on upcoming intervals
+  const notifications = applications
+    .filter((app) => app.status === "interview" && app.interviewDate)
+    .map((app) => {
+      const interviewTime = new Date(app.interviewDate);
+      const diffMs = interviewTime - now;
+      const diffMinutes = diffMs / (1000 * 60); // difference in minutes
+      const diffDays = diffMinutes / (60 * 24);
+
+      let alertType = null;
+
+      if (diffDays <= 7 && diffDays > 3) {
+        alertType = "1 week";
+      } else if (diffDays <= 3 && diffMinutes > 30) {
+        alertType = "3 days";
+      } else if (diffMinutes <= 30 && diffMinutes > 0) {
+        alertType = "30 minutes";
+      }
+
+      return alertType ? { ...app, alertType } : null;
+    })
+    .filter(Boolean);
+
+  const upcomingInterviews = notifications.length;
 
   return (
     <header className="flex items-center justify-between bg-white shadow px-6 py-3">
@@ -46,6 +65,19 @@ function Header() {
               {upcomingInterviews}
             </span>
           )}
+
+          {/* Optional dropdown: show upcoming notifications */}
+          {upcomingInterviews > 0 && (
+            <div className="absolute right-0 mt-8 w-60 bg-white border rounded shadow-lg p-2 z-10">
+              <h4 className="font-semibold text-sm mb-2">Upcoming Interviews</h4>
+              {notifications.map((app, idx) => (
+                <div key={idx} className="flex justify-between text-sm mb-1">
+                  <span>{app.company || "Unknown Company"}</span>
+                  <span className="text-gray-500">{app.alertType}</span>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Profile */}
@@ -58,11 +90,15 @@ function Header() {
             />
           ) : (
             <div className="h-8 w-8 rounded-full bg-gray-400 flex items-center justify-center text-white">
-              {user?.name?.[0].toUpperCase() || "U"}
+              {/* Display first letter of username for local users */}
+              {user?.username
+                ? user.username[0].toUpperCase()
+                : user?.name?.[0]?.toUpperCase() || "U"}
             </div>
           )}
           <span className="text-gray-700 font-medium">
-            {user?.name || user?.email?.split("@")[0]}
+            {/* Show username first, then name, then email fallback */}
+            {user?.username || user?.name || user?.email?.split("@")[0] || "User"}
           </span>
         </div>
       </div>

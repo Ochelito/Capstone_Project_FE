@@ -12,7 +12,7 @@ function Applications() {
       </section>
 
       {/* SECTION 2: View Applications */}
-      <section className="bg-white shadow rounded-lg p-4">
+      <section id="application-list" className="bg-white shadow rounded-lg p-4">
         <div className="mb-4">
           <h1 className="text-xl font-semibold">Applications</h1>
           <p className="text-gray-500">Track and manage your job applications</p>

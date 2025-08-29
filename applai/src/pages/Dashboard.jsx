@@ -7,12 +7,12 @@ import ApplicationTrends from "@/components/charts/ApplicationTrends";
 
 export default function Dashboard() {
   const { ready, init, applications } = useApplicationStore();
-  const { user, loginMethod } = useAuthStore(); // loginMethod: "google" or "email"
+  const { user, loginMethod } = useAuthStore(); // loginMethod: "google" or "local"
   const navigate = useNavigate();
 
+  // 🔹 Initialize applications based on login type
   useEffect(() => {
     if (!ready) {
-      // Determine mode based on login type
       const mode = loginMethod === "google" ? "drive" : "local";
       init(mode);
     }
@@ -20,21 +20,22 @@ export default function Dashboard() {
 
   if (!ready) return <div className="p-6">Loading dashboard…</div>;
 
-  // Greeting
-  const username = user?.email ? user.email.split("@")[0] : "Guest";
+  // 🔹 Greeting: prefer username, fallback to name/email for Google login
+  const username = user?.username || user?.name || (user?.email ? user.email.split("@")[0] : "Guest");
 
-  // Stats counts
+  // 🔹 Stats
   const total = applications.length;
   const interviews = applications.filter(a => a.status === "interview").length;
   const offers = applications.filter(a => a.status === "offer").length;
   const rejections = applications.filter(a => a.status === "rejected").length;
 
-  // Quick action handlers
+  // 🔹 Quick action handlers
   const handleViewApplications = () => {
     if (applications.length === 0) {
       alert("No applications yet, please add one!");
+    } else {
+      navigate("/applications");
     }
-    navigate("/applications");
   };
 
   return (
@@ -87,13 +88,13 @@ export default function Dashboard() {
         <h2 className="text-lg font-semibold mb-4">Quick Actions</h2>
         <div className="flex gap-4">
           <button
-            onClick={() => navigate("/applications/add")}
+            onClick={() => navigate("/applications")}
             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
           >
             Add Application
           </button>
           <button
-            onClick={handleViewApplications}
+            onClick={() => navigate("/applications#application-list")}
             className="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300 transition"
           >
             View Applications
