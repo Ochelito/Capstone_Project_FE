@@ -5,6 +5,7 @@ import GoogleLoginButton from "@/components/buttons/GoogleLoginButton";
 import useAuthStore from "@/store/authStore";
 import useApplicationStore from "@/store/applicationStore";
 import light from "@/assets/light.png";
+import illustration from "@/assets/illustration.png";
 
 function Login() {
   const login = useAuthStore((state) => state.login);
@@ -57,8 +58,12 @@ function Login() {
       </div>
 
       {/* Right side: illustration */}
-      <div className="flex-1 flex justify-center">
-        <img src="/assets/login-image.png" alt="Login illustration" className="max-w-sm rounded-xl shadow-lg" />
+      <div className="flex-1 hidden lg:flex justify-center items-center bg-purple-50 rounded-2xl shadow-inner w-full max-w-lg aspect-square p-6">
+        <img
+          src={illustration}
+          alt="Login illustration"
+          className="w-full h-full object-contain rounded-xl"
+        />
       </div>
     </div>
   );
