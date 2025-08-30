@@ -10,4 +10,5 @@ export default defineConfig({
       "@": path.resolve(__dirname, "src"), // <-- now @ points to src/
     },
   },
+  base: "./", // important for deployment
 });
