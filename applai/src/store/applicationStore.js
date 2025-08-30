@@ -30,12 +30,14 @@ const useApplicationStore = create((set, get) => ({
       const dataStr = localStorage.getItem("applications");
       const data = dataStr ? JSON.parse(dataStr) : [];
       set({
-        applications: Array.isArray(data) ? data : data.applications || [],
+        applications: (Array.isArray(data) ? data : data.applications || []).map(a => ({
+          ...a,
+          createdAt: a.createdAt || new Date().toISOString()
+        })),
         trash: data.trash || [],
         ready: true,
       });
     }
-  },
 
   // Save everything (apps + trash)
   saveAll: async () => {
@@ -53,9 +55,16 @@ const useApplicationStore = create((set, get) => ({
       id: Date.now().toString(),
       company: app.company || "",
       position: app.position || "",
-      status: app.status || "applied",
-      interviewDate: app.status === "interview" ? app.interviewDate || null : null,
+      status: app.status || "Applied",
+      interviewDate: app.status === "Interview" ? app.interviewDate || null : null,
       createdAt: new Date().toISOString(),
+      salaryOffer: app.salaryOffer || "",
+      industry: app.industry || "",
+      employmentType: app.employmentType || "",
+      workLocation: app.workLocation || "",
+      experienceFit: app.experienceFit || "",
+      notes: app.notes || "",
+      priority: app.priority || "Medium",
     };
 
     const next = [...get().applications, newApp];
@@ -71,7 +80,7 @@ const useApplicationStore = create((set, get) => ({
       let updated = { ...a, ...fields };
 
       if (fields.status) {
-        if (fields.status === "interview") {
+        if (fields.status === "Interview") {
           updated.interviewDate = fields.interviewDate || a.interviewDate || null;
         } else {
           updated.interviewDate = null;
@@ -122,9 +131,10 @@ const useApplicationStore = create((set, get) => ({
   getStats: () => {
     const apps = get().applications;
     return {
-      applied: apps.filter((a) => a.status === "applied").length,
-      interviews: apps.filter((a) => a.status === "interview").length,
-      offers: apps.filter((a) => a.status === "offer").length,
+      Applied: apps.filter(a => a.status === "Applied").length,
+      Interview: apps.filter(a => a.status === "Interview").length,
+      Offer: apps.filter(a => a.status === "Offer").length,
+      Rejected: apps.filter(a => a.status === "Rejected").length,
     };
   },
 }));

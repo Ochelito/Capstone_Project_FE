@@ -21,9 +21,9 @@ export default function Dashboard() {
   if (!ready) return <div className="p-6 text-black">Loading dashboard…</div>;
 
   const total = applications.length;
-  const interviews = applications.filter(a => a.status === "interview").length;
-  const offers = applications.filter(a => a.status === "offer").length;
-  const rejections = applications.filter(a => a.status === "rejected").length;
+  const interviews = applications.filter(a => a.status === "Interview").length;
+  const offers = applications.filter(a => a.status === "Offer").length;
+  const rejections = applications.filter(a => a.status === "Rejected").length;
 
   return (
     <div className="bg-white min-h-screen p-6 space-y-8 text-black">

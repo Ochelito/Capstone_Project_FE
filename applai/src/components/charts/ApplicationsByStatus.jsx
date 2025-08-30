@@ -24,13 +24,13 @@ export default function ApplicationsByStatus() {
   const applications = useApplicationStore((s) => s.applications);
 
   const data = useMemo(() => {
-    const counts = { applied: 0, interview: 0, offer: 0, rejected: 0 };
+    const counts = { Applied: 0, Interview: 0, Offer: 0, Rejected: 0 };
     for (const a of applications) {
       const s = a.status;
-      if (s === "applied") counts.applied += 1;
-      else if (s === "interview") counts.interview += 1;
-      else if (s === "offer") counts.offer += 1;
-      else if (s === "rejected") counts.rejected += 1;
+      if (s === "Applied") counts.applied += 1;
+      else if (s === "Interview") counts.interview += 1;
+      else if (s === "Offer") counts.offer += 1;
+      else if (s === "Rejected") counts.rejected += 1;
     }
     return [
       { name: "Applied", count: counts.applied },
