@@ -24,19 +24,19 @@ export default function ApplicationsByStatus() {
   const applications = useApplicationStore((s) => s.applications);
 
   const data = useMemo(() => {
-    const counts = { Applied: 0, Interview: 0, Offer: 0, Rejected: 0 };
+    const counts = { Applied: applications.length, Interview: 0, Offer: 0, Rejected: 0 };
     for (const a of applications) {
       const s = a.status;
-      if (s === "Applied") counts.applied += 1;
-      else if (s === "Interview") counts.interview += 1;
-      else if (s === "Offer") counts.offer += 1;
-      else if (s === "Rejected") counts.rejected += 1;
+      if (s === "Applied") counts.Applied += 1;
+      else if (s === "Interview") counts.Interview += 1;
+      else if (s === "Offer") counts.Offer += 1;
+      else if (s === "Rejected") counts.Rejected += 1;
     }
     return [
-      { name: "Applied", count: counts.applied },
-      { name: "Interview", count: counts.interview },
-      { name: "Offer", count: counts.offer },
-      { name: "Rejected", count: counts.rejected },
+      { name: "Applied", count: counts.Applied },
+      { name: "Interview", count: counts.Interview },
+      { name: "Offer", count: counts.Offer },
+      { name: "Rejected", count: counts.Rejected },
     ];
   }, [applications]);
 
@@ -68,7 +68,7 @@ export default function ApplicationsByStatus() {
   }, [applications]);
 
   return (
-    <div className="w-full h-80 bg-purple-50 rounded-xl shadow-lg p-4">
+    <div className="w-full h-80 bg-white rounded-xl shadow-lg p-4 flex flex-col">
       <h3 className="text-black font-semibold mb-1 text-lg">Applications by Status</h3>
       <p className="text-gray-600 text-sm mb-3">Total {pctLabel}</p>
 

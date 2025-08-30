@@ -1,6 +1,7 @@
-import React from "react";
+import React from "react"; 
 import useAuthStore from "@/store/authStore";
 import useApplicationStore from "@/store/applicationStore";
+import light from "@/assets/light.png";
 
 function Header() {
   const { user } = useAuthStore();
@@ -11,7 +12,7 @@ function Header() {
   const now = new Date();
 
   const notifications = applications
-    .filter((app) => app.status === "interview" && app.interviewDate)
+    .filter((app) => app.status === "Interview" && app.interviewDate)
     .map((app) => {
       const interviewTime = new Date(app.interviewDate);
       const diffMs = interviewTime - now;
@@ -19,7 +20,6 @@ function Header() {
       const diffDays = diffMinutes / (60 * 24);
 
       let alertType = null;
-
       if (diffDays <= 7 && diffDays > 3) alertType = "1 week";
       else if (diffDays <= 3 && diffMinutes > 30) alertType = "3 days";
       else if (diffMinutes <= 30 && diffMinutes > 0) alertType = "30 min";
@@ -31,15 +31,19 @@ function Header() {
   const upcomingInterviews = notifications.length;
 
   return (
-    <header className="flex items-center justify-between bg-white shadow-md px-6 py-3">
+    <header className="fixed top-0 left-0 right-0 z-50 bg-white shadow-md px-4 sm:px-6 py-3 flex items-center justify-between">
       {/* Logo */}
-      <div className="flex items-center gap-4">
-        <img src="/assets/logo.png" alt="Logo" className="h-10 w-10" />
-        <h1 className="text-xl font-bold text-black">Job Tracker</h1>
+      <div className="flex items-center gap-2 sm:gap-4 w-full sm:w-auto justify-center sm:justify-start">
+        <img src={light} alt="Logo" className="h-7 w-28 sm:w-auto" />
+
+        {/* Job Tracker text hidden on small screens */}
+        <h1 className="hidden sm:block text-xl font-bold text-black">
+          Job Tracker
+        </h1>
       </div>
 
       {/* Right side: notifications + profile */}
-      <div className="flex items-center gap-6">
+      <div className="flex items-center gap-4 sm:gap-6 ml-auto">
         {/* Notification bell */}
         <div className="relative cursor-pointer group">
           <svg
@@ -92,7 +96,7 @@ function Header() {
               {userInitials}
             </div>
           )}
-          <span className="text-black font-medium">{displayName || "User"}</span>
+          <span className="hidden sm:block text-black font-medium">{displayName || "User"}</span>
         </div>
       </div>
     </header>

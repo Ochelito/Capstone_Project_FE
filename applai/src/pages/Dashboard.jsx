@@ -29,7 +29,7 @@ export default function Dashboard() {
     <div className="bg-white min-h-screen p-6 space-y-8 text-black">
       {/* Header */}
       <h1 className="text-2xl font-bold">Dashboard</h1>
-      <p className="text-gray-700">Welcome back, {displayName}</p>
+      <p className="text-gray-700">Welcome {displayName}</p>
 
       {/* Stats boxes */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
@@ -71,18 +71,18 @@ export default function Dashboard() {
       </div>
 
       {/* Quick Actions */}
-      <div className="bg-purple-100 rounded-xl shadow-md p-6 mt-8">
+      <div className="rounded-xl shadow-md p-6 mt-8">
         <h2 className="text-lg font-semibold mb-4">Quick Actions</h2>
         <div className="flex gap-4 flex-wrap">
           <button
             onClick={() => navigate("/applications")}
-            className="px-4 py-2 bg-purple-200 text-black rounded-lg hover:bg-purple-300 transition"
+            className="px-4 py-2 bg-purple-400 text-black rounded-lg hover:bg-purple-300 transition"
           >
             Add Application
           </button>
           <button
             onClick={() => navigate("/applications#application-list")}
-            className="px-4 py-2 bg-purple-50 text-black rounded-lg hover:bg-purple-100 transition"
+            className="px-4 py-2 bg-purple-100 text-black rounded-lg hover:bg-purple-100 transition"
           >
             View Applications
           </button>

@@ -4,6 +4,7 @@ import LoginForm from "@/components/forms/LoginForm";
 import GoogleLoginButton from "@/components/buttons/GoogleLoginButton";
 import useAuthStore from "@/store/authStore";
 import useApplicationStore from "@/store/applicationStore";
+import light from "@/assets/light.png";
 
 function Login() {
   const login = useAuthStore((state) => state.login);
@@ -33,7 +34,7 @@ function Login() {
     <div className="min-h-screen bg-white flex flex-col md:flex-row items-center justify-center gap-8 p-8">
       {/* Left side: login form / Google login */}
       <div className="flex-1 max-w-md flex flex-col gap-6 bg-purple-50 rounded-xl shadow-lg p-8">
-        <img src="/assets/logo.png" alt="Logo" className="h-12 w-12 mx-auto" />
+        <img src={light} alt="Logo" className="h-9 w-32 mx-auto" />
         <h1 className="text-2xl font-bold text-black text-center">
           Start tracking your Job Applications for FREE
         </h1>

@@ -4,11 +4,10 @@ import useApplicationStore from "@/store/applicationStore";
 export default function Interviews() {
   const { applications, updateApplication } = useApplicationStore();
 
-  // Filter and sort applications by status
   const sortedApps = [...applications]
-    .filter(a => a.status === "interview" || a.status === "offer" || a.status === "rejected")
+    .filter(a => a.status === "Interview" || a.status === "Offer" || a.status === "Rejected")
     .sort((a, b) => {
-      const order = { interview: 0, offer: 1, rejected: 2 };
+      const order = { Interview: 0, Offer: 1, Rejected: 2 };
       return order[a.status] - order[b.status];
     });
 
@@ -18,11 +17,11 @@ export default function Interviews() {
 
   const getStatusClass = (status) => {
     switch (status) {
-      case "interview":
+      case "Interview":
         return "bg-purple-50 border-l-4 border-purple-400";
-      case "offer":
+      case "Offer":
         return "bg-purple-100 border-l-4 border-purple-500";
-      case "rejected":
+      case "Rejected":
         return "bg-purple-200 border-l-4 border-purple-600";
       default:
         return "bg-purple-50";
@@ -31,11 +30,11 @@ export default function Interviews() {
 
   const getBadgeClass = (status) => {
     switch (status) {
-      case "interview":
+      case "Interview":
         return "text-purple-800 bg-purple-200";
-      case "offer":
+      case "Offer":
         return "text-purple-900 bg-purple-300";
-      case "rejected":
+      case "Rejected":
         return "text-purple-700 bg-purple-100";
       default:
         return "text-black bg-gray-100";
@@ -49,51 +48,54 @@ export default function Interviews() {
       {sortedApps.length === 0 && <p className="text-gray-600">No upcoming interviews.</p>}
 
       <ul className="space-y-3">
-        {sortedApps.map(app => (
-          <li
-            key={app.id}
-            className={`p-4 rounded-xl shadow hover:shadow-lg flex justify-between items-center transition ${getStatusClass(app.status)}`}
-          >
-            <div>
-              <p className="font-semibold text-black">{app.position} @ {app.company}</p>
+        {sortedApps.map(app => {
+          const date = app.interviewDate ? new Date(app.interviewDate) : null;
+          const time = date ? date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : null;
 
-              {app.status === "interview" && app.interviewDate && (
-                <p className="text-sm text-gray-600">Date: {new Date(app.interviewDate).toLocaleDateString()}</p>
-              )}
+          return (
+            <li
+              key={app.id}
+              className={`p-4 rounded-xl shadow hover:shadow-lg flex justify-between items-center transition ${getStatusClass(app.status)}`}
+            >
+              <div>
+                <p className="font-semibold text-black">{app.position} @ {app.company}</p>
 
-              {app.status === "interview" && (
+                {app.status === "Interview" && date && (
+                  <>
+                    <p className="text-sm text-gray-600">Date: {date.toLocaleDateString()}</p>
+                    <p className="text-sm text-gray-600">Time: {time}</p>
+                    {app.interviewLocation && (
+                      <p className="text-sm text-gray-600">Location: {app.interviewLocation}</p>
+                    )}
+                  </>
+                )}
+
                 <span className={`inline-block mt-1 px-2 py-0.5 text-xs font-semibold rounded-full ${getBadgeClass(app.status)}`}>
-                  Upcoming
+                  {app.status === "Interview" ? "Upcoming" : app.status.toUpperCase()}
                 </span>
-              )}
-            </div>
+              </div>
 
-            <div className="flex gap-2">
-              {app.status === "interview" && (
-                <>
-                  <button
-                    onClick={() => handleStatusChange(app.id, "offer")}
-                    className="px-3 py-1 bg-purple-300 text-black rounded hover:bg-purple-400 transition"
-                  >
-                    Offer
-                  </button>
-                  <button
-                    onClick={() => handleStatusChange(app.id, "rejected")}
-                    className="px-3 py-1 bg-purple-200 text-black rounded hover:bg-purple-300 transition"
-                  >
-                    Reject
-                  </button>
-                </>
-              )}
-
-              {(app.status === "offer" || app.status === "rejected") && (
-                <span className={`px-3 py-1 rounded font-semibold ${getBadgeClass(app.status)}`}>
-                  {app.status.toUpperCase()}
-                </span>
-              )}
-            </div>
-          </li>
-        ))}
+              <div className="flex gap-2">
+                {app.status === "Interview" && (
+                  <>
+                    <button
+                      onClick={() => handleStatusChange(app.id, "Offer")}
+                      className="px-3 py-1 bg-purple-300 text-black rounded hover:bg-purple-400 transition"
+                    >
+                      Offer
+                    </button>
+                    <button
+                      onClick={() => handleStatusChange(app.id, "Rejected")}
+                      className="px-3 py-1 bg-purple-200 text-black rounded hover:bg-purple-300 transition"
+                    >
+                      Reject
+                    </button>
+                  </>
+                )}
+              </div>
+            </li>
+          );
+        })}
       </ul>
     </div>
   );

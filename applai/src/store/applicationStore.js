@@ -16,28 +16,47 @@ const useApplicationStore = create((set, get) => ({
   init: async (mode = "local") => {
     set({ mode });
 
-    if (mode === "drive") {
-      const fileId = await ensureFile();
-      const data = await loadApplications(fileId);
-      set({
-        fileId,
-        applications: data.applications || data,
-        trash: data.trash || [],
-        ready: true,
-      });
-    } else {
-      // localStorage mode
-      const dataStr = localStorage.getItem("applications");
-      const data = dataStr ? JSON.parse(dataStr) : [];
-      set({
-        applications: (Array.isArray(data) ? data : data.applications || []).map(a => ({
-          ...a,
-          createdAt: a.createdAt || new Date().toISOString()
-        })),
-        trash: data.trash || [],
-        ready: true,
-      });
+    try {
+      if (mode === "drive") {
+        const fileId = await ensureFile();
+        const data = await loadApplications(fileId);
+        set({
+          fileId,
+          applications: (data.applications || []).map(a => ({
+            ...a,
+            status: a.status || "Applied",
+            createdAt: a.createdAt || new Date().toISOString(),
+          })),
+          trash: (data.trash || []).map(a => ({
+            ...a,
+            status: a.status || "Applied",
+            createdAt: a.createdAt || new Date().toISOString(),
+          })),
+          ready: true,
+        });
+      } else {
+        // localStorage mode
+        const dataStr = localStorage.getItem("applications");
+        const data = dataStr ? JSON.parse(dataStr) : { applications: [], trash: [] };
+        set({
+          applications: (Array.isArray(data) ? data : data.applications || []).map(a => ({
+            ...a,
+            status: a.status || "Applied",
+            createdAt: a.createdAt || new Date().toISOString(),
+          })),
+          trash: (data.trash || []).map(a => ({
+            ...a,
+            status: a.status || "Applied",
+            createdAt: a.createdAt || new Date().toISOString(),
+          })),
+          ready: true,
+        });
+      }
+    } catch (err) {
+      console.error("Failed to initialize applications:", err);
+      set({ ready: true }); // avoid freezing the UI
     }
+  },
 
   // Save everything (apps + trash)
   saveAll: async () => {
@@ -79,6 +98,7 @@ const useApplicationStore = create((set, get) => ({
 
       let updated = { ...a, ...fields };
 
+      // Ensure interviewDate is handled correctly
       if (fields.status) {
         if (fields.status === "Interview") {
           updated.interviewDate = fields.interviewDate || a.interviewDate || null;
@@ -101,7 +121,10 @@ const useApplicationStore = create((set, get) => ({
     if (!toDelete) return;
 
     const nextApps = apps.filter((a) => a.id !== id);
-    const nextTrash = [...get().trash, { ...toDelete, deletedAt: new Date().toISOString() }];
+    const nextTrash = [
+      ...get().trash,
+      { ...toDelete, deletedAt: new Date().toISOString() }
+    ];
 
     set({ applications: nextApps, trash: nextTrash });
     await get().saveAll();

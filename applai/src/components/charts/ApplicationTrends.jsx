@@ -62,7 +62,7 @@ export default function ApplicationTrends() {
   }, [applications]);
 
   return (
-    <div className="w-full h-80 bg-white rounded-xl shadow-lg p-4">
+    <div className="w-full h-80 bg-white rounded-xl shadow-lg p-4 flex flex-col">
       <h3 className="text-black font-semibold mb-1 text-lg">Application Trends</h3>
       <p className="text-gray-600 text-sm mb-3">Last 6 months</p>
 
