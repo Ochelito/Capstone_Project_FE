@@ -41,7 +41,7 @@ Most people rely on spreadsheets or notes apps, neither of which are tailored fo
 - Add interview details (date, time, contact person, notes)  
 - Auto reminders (via browser notifications, ready for email/text integration)  
 
-### Task / To-Do List
+### Task / To-Do List/ Notifications
 - Custom reminders for follow-ups, applications, thank-you emails  
 
 ### Filters & Search
@@ -65,10 +65,10 @@ Most people rely on spreadsheets or notes apps, neither of which are tailored fo
 
 ## Tech Stack
 
-**Frontend:** React, React Router, Zustand / Context API, Tailwind CSS, Headless UI  
+**Frontend:** React, React Router, Zustand, Tailwind CSS  
 **Charts & Analytics:** Recharts  
-**Date Handling:** date-fns or dayjs  
-**Optional Auth / Backend:** Firebase Auth or Clerk, Google API Client Library  
-**Deployment:** Vercel or Netlify  
+**Date Handling:** dayjs  
+**Optional Auth / Backend:** Google API Client Library  
+**Deployment:** Vercel 
 **Dev Tools:** ESLint, Prettier, GitHub, VS Code
 
