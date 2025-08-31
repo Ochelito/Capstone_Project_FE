@@ -1,18 +1,21 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 
+// Auth store for managing user login state and persistence
 const useAuthStore = create(
   persist(
     (set) => ({
-      user: null,
-      loginMethod: null,
-      error: null,
+      // State variables
+      user: null,          // Stores logged-in user data (local or Google)
+      loginMethod: null,   // Tracks login method: "local" or "google"
+      error: null,         // Stores error messages during login
 
-      // 🔹 Login (local + Google)
+      // Login action (supports local and Google login)
       login: (userData, method) => {
         try {
           let user;
 
+          // Google login validation
           if (method === "google") {
             if (!userData.email || !userData.name) {
               throw new Error("Invalid Google user data");
@@ -22,6 +25,8 @@ const useAuthStore = create(
               name: userData.name,
               picture: userData.picture || null,
             };
+
+          // Local login validation
           } else if (method === "local") {
             if (!userData.username || userData.username.length < 8) {
               throw new Error("Username must be at least 8 characters");
@@ -31,23 +36,29 @@ const useAuthStore = create(
             }
             user = {
               username: userData.username,
-              password: userData.password, // ⚠️ don't keep in prod
+              password: userData.password, 
               picture: userData.picture || null,
             };
+
+          // Unsupported login method
           } else {
             throw new Error("Unsupported login method");
           }
 
+          // Update state on successful login
           set({ user, loginMethod: method, error: null });
+
         } catch (err) {
+          // Update state with error message on failure
           set({ error: err.message });
         }
       },
 
-      // 🔹 Logout
+      // Logout action
       logout: () => set({ user: null, loginMethod: null, error: null }),
     }),
     {
+      // Persist store in localStorage under the key "auth-storage"
       name: "auth-storage",
       storage: createJSONStorage(() => localStorage),
     }

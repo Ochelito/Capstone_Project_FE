@@ -5,15 +5,21 @@ import { BarChart2, FileText, Calendar, LogOut, Menu, X } from "lucide-react";
 
 function SideBar() {
   const navigate = useNavigate();
+
+  // Access logout function from global auth store
   const logout = useAuthStore((state) => state.logout);
+
+  // State to control whether mobile sidebar is open/closed
   const [isOpen, setIsOpen] = useState(false);
 
+  // Logout handler → clears session, redirects to login, closes sidebar
   const handleLogout = () => {
     logout();
     navigate("/login");
     setIsOpen(false);
   };
 
+  // Sidebar navigation links
   const links = [
     { name: "Analytics & Insights", path: "/dashboard", icon: <BarChart2 size={24} /> },
     { name: "Application Management", path: "/applications", icon: <FileText size={24} /> },
@@ -22,7 +28,7 @@ function SideBar() {
 
   return (
     <>
-      {/* Hamburger */}
+      {/* Hamburger Button (only on mobile) */}
       <div className="fixed top-4 left-4 z-60 md:hidden">
         <button
           onClick={() => setIsOpen(!isOpen)}
@@ -32,7 +38,7 @@ function SideBar() {
         </button>
       </div>
 
-      {/* Mobile Fullscreen Menu */}
+      {/* Mobile Fullscreen Sidebar */}
       <div
         className={`
           fixed inset-0 z-40 md:hidden transition-transform duration-300
@@ -40,28 +46,28 @@ function SideBar() {
           bg-gradient-to-b from-purple-700 to-purple-900 text-white flex flex-col
         `}
       >
-        {/* Close button at top-right */}
+        {/* Close button (top-right) */}
         <div className="flex justify-end p-4">
           <button onClick={() => setIsOpen(false)}>
             <X size={28} className="text-white" />
           </button>
         </div>
 
-        {/* Logo / Title */}
+        {/* App Logo & Title */}
         <div className="flex flex-col items-center justify-start mb-12 mt-12">
           <h1 className="text-2xl font-bold text-white mb-2">Job Tracker</h1>
           <p className="text-white/80 text-sm text-center px-6">
             Manage applications & track interviews easily
           </p>
-      </div>
+        </div>
 
-        {/* Navigation Links */}
+        {/* Navigation Links (Mobile) */}
         <nav className="flex flex-col items-center gap-6 flex-1">
           {links.map((link) => (
             <NavLink
               key={link.path}
               to={link.path}
-              onClick={() => setIsOpen(false)}
+              onClick={() => setIsOpen(false)} // Close sidebar after click
               className={({ isActive }) =>
                 `flex items-center gap-4 px-6 py-4 rounded-xl text-lg font-semibold w-3/4 justify-center
                 transition-all duration-200
@@ -74,7 +80,7 @@ function SideBar() {
           ))}
         </nav>
 
-        {/* Logout */}
+        {/* Logout Button (Mobile) */}
         <div className="flex justify-center mb-10">
           <button
             onClick={handleLogout}
@@ -86,13 +92,15 @@ function SideBar() {
         </div>
       </div>
 
-      {/* Desktop Sidebar */}
+      {/* Desktop Sidebar (always visible on md+ screens) */}
       <aside className="hidden md:flex w-64 bg-white shadow-md min-h-screen p-6 flex-col border-r border-purple-100
                         pt-20 z-40">
+        {/* Sidebar Header */}
         <div className="mb-8">
           <p className="text-lg font-bold text-black">Manage Applications & Track Interviews</p>
         </div>
 
+        {/* Navigation Links (Desktop) */}
         <nav className="flex flex-col gap-3">
           {links.map((link) => (
             <NavLink
@@ -109,6 +117,7 @@ function SideBar() {
           ))}
         </nav>
 
+        {/* Logout Button (Desktop) */}
         <div className="mt-auto">
           <button
             onClick={handleLogout}

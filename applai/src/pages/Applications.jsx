@@ -5,26 +5,33 @@ import ApplicationList from "@/components/layout/ApplicationList";
 function Applications() {
   return (
     <main className="bg-white min-h-screen p-6 space-y-8 text-black">
-      {/* SECTION 1: Add Application */}
+      {/*SECTION 1: Add Application*/}
       <section className="bg-purple-100 shadow-md rounded-lg p-6">
+        {/* Section heading */}
         <h1 className="text-xl font-semibold mb-4">Add New Application</h1>
+
+        {/* Button to add a new job application */}
         <AddApplicationButton className="bg-purple-200 text-black hover:bg-purple-300 transition" />
       </section>
 
-      {/* SECTION 2: View Applications */}
+      {/*SECTION 2: View Applications*/}
       <section id="application-list" className="bg-purple-100 shadow-md rounded-lg p-6">
+        {/* Section header */}
         <div className="mb-4">
           <h1 className="text-xl font-semibold mb-1">Applications</h1>
           <p className="text-gray-700">Track and manage your job applications</p>
         </div>
 
-        {/* Search + Filter UI */}
+        {/* Search + Filter Bar*/}
         <div className="flex gap-4 mb-4">
+          {/* Search input to filter applications by keywords */}
           <input
             type="text"
             placeholder="Search applications..."
             className="flex-1 px-3 py-2 rounded border border-purple-200 bg-purple-50 focus:outline-none focus:ring-2 focus:ring-purple-300"
           />
+
+          {/* Dropdown to filter applications by status */}
           <select className="px-3 py-2 rounded border border-purple-200 bg-purple-50 focus:outline-none focus:ring-2 focus:ring-purple-300">
             <option value="">Filter by Status</option>
             <option value="Applied">Applied</option>
@@ -34,7 +41,7 @@ function Applications() {
           </select>
         </div>
 
-        {/* Application List */}
+        {/*Application List Display*/}
         <ApplicationList />
       </section>
     </main>

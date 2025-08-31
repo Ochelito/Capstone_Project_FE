@@ -2,10 +2,14 @@ import React, { useState } from "react";
 import useApplicationStore from "@/store/applicationStore";
 
 function ApplicationList() {
+  // Get applications and update function from Zustand store
   const applications = useApplicationStore((state) => state.applications);
   const updateApplication = useApplicationStore((state) => state.updateApplication);
 
+  // Track which application is currently being edited
   const [editingIndex, setEditingIndex] = useState(null);
+
+  // Hold the editable data when editing an application
   const [editData, setEditData] = useState({
     status: "",
     interviewDate: "",
@@ -20,6 +24,7 @@ function ApplicationList() {
     notes: ""
   });
 
+  // Show message if no applications exist
   if (!applications || applications.length === 0) {
     return (
       <div className="pt-4">
@@ -28,10 +33,12 @@ function ApplicationList() {
     );
   }
 
+  // Trigger edit mode for a specific application
   const handleEditClick = (index, app) => {
-    setEditingIndex(index);
+    setEditingIndex(index); // remember which app is being edited
     setEditData({
       status: app.status,
+      // Ensure interviewDate is stored in `YYYY-MM-DD` format for input type="date"
       interviewDate: app.interviewDate ? new Date(app.interviewDate).toISOString().split("T")[0] : "",
       interviewTime: app.interviewTime || "",
       interviewLocation: app.interviewLocation || "",
@@ -45,14 +52,18 @@ function ApplicationList() {
     });
   };
 
+  // Update editData state whenever a form field changes
   const handleChange = (e) => setEditData({ ...editData, [e.target.name]: e.target.value });
 
+  // Save changes back into the store
   const handleSave = (appId) => {
+    // Validate interview fields if status = Interview
     if (editData.status === "Interview" && (!editData.interviewDate || !editData.interviewTime || !editData.interviewLocation)) {
       alert("For interviews, date, time, and location are required.");
       return;
     }
 
+    // Update the application in the store
     updateApplication(appId, { 
       status: editData.status, 
       interviewDate: editData.status === "Interview" ? `${editData.interviewDate}T${editData.interviewTime}` : null,
@@ -67,6 +78,7 @@ function ApplicationList() {
       notes: editData.notes
     });
 
+    // Exit edit mode after saving
     setEditingIndex(null);
   };
 
@@ -74,30 +86,44 @@ function ApplicationList() {
     <div className="pt-4">
       <ul className="space-y-4">
         {applications.map((app, index) => (
-          <li key={index} className="p-4 bg-purple-50 rounded-xl shadow hover:shadow-lg transition">
+          <li 
+            key={index} 
+            className="p-4 bg-purple-50 rounded-xl shadow hover:shadow-lg transition"
+          >
             <div className="flex justify-between items-start gap-4">
+              
+              {/* Main application content */}
               <div className="flex-1 space-y-1">
                 {editingIndex === index ? (
+                  // ----------- EDIT MODE -----------
                   <>
+                    {/* Editable fields */}
                     <input type="text" name="company" value={editData.company || app.company} onChange={handleChange} placeholder="Company" className="w-full border border-purple-200 rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-purple-300"/>
                     <input type="text" name="position" value={editData.position || app.position} onChange={handleChange} placeholder="Position" className="w-full border border-purple-200 rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-purple-300"/>
                     <input type="date" name="dateApplied" value={editData.dateApplied} onChange={handleChange} className="w-full border border-purple-200 rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-purple-300"/>
                     <input type="text" name="salary" value={editData.salary} onChange={handleChange} placeholder="Salary" className="w-full border border-purple-200 rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-purple-300"/>
                     <input type="text" name="industry" value={editData.industry} onChange={handleChange} placeholder="Industry" className="w-full border border-purple-200 rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-purple-300"/>
+                    
+                    {/* Employment type dropdown */}
                     <select name="employmentType" value={editData.employmentType} onChange={handleChange} className="w-full border border-purple-200 rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-purple-300">
                       <option value="">Select Employment Type</option>
                       <option value="Full-time">Full-time</option>
                       <option value="Part-time">Part-time</option>
                       <option value="Contract">Contract</option>
                     </select>
+
+                    {/* Work location dropdown */}
                     <select name="workLocation" value={editData.workLocation} onChange={handleChange} className="w-full border border-purple-200 rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-purple-300">
                       <option value="">Select Work Type</option>
                       <option value="Remote">Remote</option>
                       <option value="Hybrid">Hybrid</option>
                       <option value="Onsite">Onsite</option>
                     </select>
+
                     <input type="text" name="fit" value={editData.fit} onChange={handleChange} placeholder="How your profile fits" className="w-full border border-purple-200 rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-purple-300"/>
                     <textarea name="notes" value={editData.notes} onChange={handleChange} placeholder="Notes" className="w-full border border-purple-200 rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-purple-300"/>
+
+                    {/* Extra interview fields only if status = Interview */}
                     {editData.status === "Interview" && (
                       <>
                         <input type="date" name="interviewDate" value={editData.interviewDate} onChange={handleChange} className="w-full border border-purple-200 rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-purple-300" required/>
@@ -107,6 +133,7 @@ function ApplicationList() {
                     )}
                   </>
                 ) : (
+                  // ----------- VIEW MODE -----------
                   <>
                     <h2 className="text-lg font-semibold">{app.position}</h2>
                     <p className="text-black">{app.company}</p>
@@ -117,15 +144,21 @@ function ApplicationList() {
                     <p className="text-sm text-gray-600">Work: {app.workLocation}</p>
                     <p className="text-sm text-gray-600">Fit: {app.fit}</p>
                     <p className="text-sm text-gray-600">Notes: {app.notes}</p>
+                    
+                    {/* Show interview info if scheduled */}
                     {app.status === "Interview" && app.interviewDate && (
-                      <p className="text-sm text-purple-700">Interview: {new Date(app.interviewDate).toLocaleString()} @ {app.interviewLocation}</p>
+                      <p className="text-sm text-purple-700">
+                        Interview: {new Date(app.interviewDate).toLocaleString()} @ {app.interviewLocation}
+                      </p>
                     )}
                   </>
                 )}
               </div>
 
+              {/* Right-hand column: Status + Actions */}
               <div className="flex flex-col items-end gap-2">
                 {editingIndex === index ? (
+                  // Show save/cancel when editing
                   <div className="flex flex-col gap-2">
                     <select name="status" value={editData.status} onChange={handleChange} className="px-3 py-1 text-sm rounded-full border border-purple-200 focus:outline-none focus:ring-1 focus:ring-purple-300">
                       <option value="Applied">Applied</option>
@@ -139,6 +172,7 @@ function ApplicationList() {
                     </div>
                   </div>
                 ) : (
+                  // Show status + edit button in view mode
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className={`px-3 py-1 text-sm rounded-full ${
                       app.status === "Applied" ? "bg-purple-100 text-purple-700" :
@@ -148,7 +182,12 @@ function ApplicationList() {
                     }`}>
                       {app.status}
                     </span>
-                    <button onClick={() => handleEditClick(index, app)} className="text-sm text-purple-700 hover:underline">Edit</button>
+                    <button 
+                      onClick={() => handleEditClick(index, app)} 
+                      className="text-sm text-purple-700 hover:underline"
+                    >
+                      Edit
+                    </button>
                   </div>
                 )}
               </div>
